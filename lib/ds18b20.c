@@ -8,7 +8,6 @@
 ** If it is not defined, it will be defined with a default value of 1000000UL
 ** in util/delay.h
 */
-#include <errno.h>
 #include <avr/io.h>
 #include <util/delay.h>
 #include "ds18b20.h"
@@ -332,67 +331,11 @@ uint8_t _read_byte(ds18b20_t *p)
 
     for (n = 0; n < 8; n++)
     {
-        /*
-        ** read slot; pull bus low for Tread (1us)
-        ** then release and wait a bit before sampling
-        ** should sample close to but before expiration of Trdv
-        */
-        switch(port)
-        {
-#ifdef PORTA
-            case DS_PORT_A:
-                DDRA = DDRA | phigh;
-                PORTA = PORTA & plow;
-                _delay_us(Tread);
-
-                DDRA = DDRA & plow;
-                _delay_us(Trdv - Tread - 1);
-                dq = (PINA & phigh) >> pin;
-                break;
-#endif
-#ifdef PORTB
-            case DS_PORT_B:
-                DDRB = DDRB | phigh;
-                PORTB = PORTB & plow;
-                _delay_us(Tread);
-
-                DDRB = DDRB & plow;
-                _delay_us(Trdv - Tread - 1);
-                dq = (PINB & phigh) >> pin;
-                break;
-#endif
-#ifdef PORTC
-            case DS_PORT_C:
-                DDRC = DDRC | phigh;
-                PORTC = PORTC & plow;
-                _delay_us(Tread);
-
-                DDRC = DDRC & plow;
-                _delay_us(Trdv - Tread - 1);
-                dq = (PINC & phigh) >> pin;
-                break;
-#endif
-#ifdef PORTD
-            case DS_PORT_D:
-                DDRD = DDRD | phigh;
-                PORTD = PORTD & plow;
-                _delay_us(Tread);
-
-                DDRD = DDRD & plow;
-                _delay_us(Trdv - Tread - 1);
-                dq = (PIND & phigh) >> pin;
-                break;
-#endif
-
-            default:
-                break;
-        }
-
-        ch = dq << n;
+        ch = _read_dq(p) << n;
         data |= ch;
 
         /* then wait the rest of slot + recovery time */
-        _delay_us(Tslot - Trdv + Tread + 1 + Trec);
+        _delay_us(Tslot - Trdv + 1 + Trec);
     }
 
     return data;

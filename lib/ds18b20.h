@@ -15,7 +15,7 @@
 #define Tpdl		60	// minimum
 #define Tread		1	// minimum
 #define Trstwait	65	// typical
-#define Twr		10	// maximum
+#define Twr		10000	// maximum
 
 /* mask and size values */
 #define DS_RES_2	0x1f
